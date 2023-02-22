@@ -1,9 +1,9 @@
 [![Node.js Package](https://github.com/Nova-Studios-Ltd/Typescript-Dictionary-Package/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/Nova-Studios-Ltd/Typescript-NetAPI-Package/actions/workflows/npm-publish.yml)
-# Typescript Dictionary
+# Typescript NetAPI
 
 ## Description
 
-NPM package for our internal Dictionary class
+NPM package for our internal NetAPI class
 
 ## Requirements
 
@@ -19,16 +19,11 @@ npm install @nova-studios-ltd/typescript-netapi
 
 ## Basic Usage
 ```typescript
-import { KeyValuePair, Dictionary } from "@nova-studios-ltd/typescript-netapi";
+import { NetAPI } from "@nova-studios-ltd/typescript-netapi";
 
-// Create new instance
-const dict = new Dictionary<string, string>();
+NetAPI.Init("https://api.novastudios.uk");
 
-// Set key/value
-dict.setValue("Hello", "Bonjour");
-
-// Get value
-dict.getValue("Hello") // -> Returns 'Bonjour'
+NetAPI.Get();
 
 ```
 
