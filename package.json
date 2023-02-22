@@ -1,0 +1,33 @@
+{
+  "name": "@nova-studios-ltd/typescript-netapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "fetch",
+    "api"
+  ],
+  "author": "nova1545",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nova-Studios-Ltd/Typescript-NetAPI-Package.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Nova-Studios-Ltd/Typescript-NetAPI-Package.git/issues"
+  },
+  "homepage": "https://github.com/Nova-Studios-Ltd/Typescript-NetAPI-Package.git#readme",
+  "dependencies": {
+    "@nova-studios-ltd/typescript-dictionary": "^1.0.8"
+  }
+}
