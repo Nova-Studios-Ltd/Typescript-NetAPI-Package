@@ -23,7 +23,7 @@ import { NetAPI } from "@nova-studios-ltd/typescript-netapi";
 
 NetAPI.Init("https://api.novastudios.uk");
 
-NetAPI.Get();
+const resp = await NetAPI.Get("/Channel/my-new-channel");
 
 ```
 

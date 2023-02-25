@@ -3,7 +3,7 @@ import { BufferPayload } from "./BufferPayload";
 import { NetHeaders } from "./NetHeaders";
 import { NetResponse } from "./NetResponse";
 
-export default class NetAPI {
+export class NetAPI {
     private static API_DOMAIN = "";
 
     static async Init(domain: string) {
