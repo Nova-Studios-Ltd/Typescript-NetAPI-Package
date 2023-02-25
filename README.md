@@ -23,7 +23,11 @@ import { NetAPI } from "@nova-studios-ltd/typescript-netapi";
 
 NetAPI.Init("https://api.novastudios.uk");
 
-const resp = await NetAPI.Get("/Channel/my-new-channel");
+// GET (Applies to all methods) Without headers
+await NetAPI.GET<string>("/Channel/my-new-channel");
+
+// GET (Applies to all methods) With headers
+await NetAPI.GET<string>("/Channel/my-new-channel-2", new NetHeaders().WithAuthorization("MyPassword"));
 
 ```
 
