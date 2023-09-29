@@ -102,10 +102,11 @@ export class NetAPI {
      * @param headers Optional headers along side the request
      * @returns A NetResponse with the data
      */
-    static async DELETE<T>(endpoint: string, headers?: NetHeaders) : Promise<NetResponse<T>> {
+    static async DELETE<T>(endpoint: string, payload: string, headers?: NetHeaders) : Promise<NetResponse<T>> {
         const resp = await fetch((endpoint.startsWith("http"))? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
             method: "DELETE",
-            headers: headers?.Finish() || {}
+            headers: headers?.Finish() || {},
+            body: payload
         });
     
         return new NetResponse<T>(resp.status, resp.statusText, NetAPI.ParsePayload<T>(await resp.text()));
