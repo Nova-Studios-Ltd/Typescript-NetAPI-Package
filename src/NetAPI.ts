@@ -50,11 +50,19 @@ export class NetAPI {
      * @param headers Optional headers along side the request
      * @returns A NetResponse with the data
      */
-    static async POST<T>(endpoint: string, payload: string, headers?: NetHeaders) : Promise<NetResponse<T>> {
+    static async POST<T>(endpoint: string, payload: string | BufferPayload[], headers?: NetHeaders) : Promise<NetResponse<T>> {
+        let finalPayload: string | FormData;
+        if (typeof payload === "string") finalPayload = payload;
+        else {
+            const formData = new FormData();
+            payload.forEach((buf) => formData.append("file", buf.payload, buf.name));
+            finalPayload = formData;
+        }
+
         const resp = await fetch((endpoint.startsWith("http"))? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
             method: "POST",
             headers: headers?.Finish() || {},
-            body: payload
+            body: finalPayload
         });
     
         return new NetResponse<T>(resp.status, resp.statusText, NetAPI.ParsePayload<T>(await resp.text()));
@@ -121,15 +129,15 @@ export class NetAPI {
      * @param ignoreCache Ignores cache
      * @returns A NetResponse with the data
      */
-    static async  GETBuffer(endpoint: string, headers?: NetHeaders, ignoreCache = false) : Promise<NetResponse<Uint8Array>> {
+    static async GETBuffer(endpoint: string, headers?: NetHeaders, ignoreCache = false) : Promise<NetResponse<Uint8Array>> {
         endpoint = endpoint.replace(NetAPI.API_DOMAIN, "");
         const url = (endpoint.startsWith("http"))? `${this.API_DOMAIN}/Proxy?url=${endpoint}` : `${this.API_DOMAIN}/${endpoint}`;
     
         const cache = await caches.open("MediaCache");
     
         if (!ignoreCache && cache !== undefined) {
-        const entry = await cache.match(url);
-        if (entry !== undefined) return new NetResponse<Uint8Array>(entry.status, entry.statusText, new Uint8Array(await entry.arrayBuffer()));
+            const entry = await cache.match(url);
+            if (entry !== undefined) return new NetResponse<Uint8Array>(entry.status, entry.statusText, new Uint8Array(await entry.arrayBuffer()));
         }
     
         const resp = await fetch(url, {
@@ -138,31 +146,8 @@ export class NetAPI {
         });
     
         if (!ignoreCache && cache !== undefined) {
-        cache.put(url, resp.clone());
+            cache.put(url, resp.clone());
         }
         return new NetResponse<Uint8Array>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()));
-    }
-  
-    /**
-     * Use to POST a buffer to the API (Uses FormData)
-     * @param endpoint Url of the endpoint
-     * @param payload The payload to post
-     * @param headers Optional headers along side the request
-     * @returns A NetResponse with the data
-     */
-    static async  POSTBuffer(endpoint: string, payload: BufferPayload, headers?: NetHeaders) : Promise<NetResponse<string>> {
-        const formData = new FormData();
-        formData.append("file", payload.payload, payload.name);
-        payload.extraFields.forEach((pair: KeyValuePair<string, string>) => {
-            formData.append(pair.Key, pair.Value);
-        });
-    
-        const resp = await fetch(`${this.API_DOMAIN}/${endpoint}`, {
-            method: "POST",
-            body: formData,
-            headers: headers?.Finish() || {}
-        });
-    
-        return new NetResponse<string>(resp.status, resp.statusText, await resp.text());
     }
 }
