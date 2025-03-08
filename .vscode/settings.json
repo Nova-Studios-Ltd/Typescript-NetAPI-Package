@@ -1,20 +1,29 @@
 {
-    "files.exclude":{
-      "**/.git": true,
-      "**/.svn": true,
-      "**/.hg": true,
-      "**/CVS": true,
-      "**/.DS_Store": true,
-      "**/Thumbs.db": true,
-      "**/node_modules": true,
-      "**/.erb": true,
-      "**/.husky": true,
-      "**/__tests__": true,
-      "**/.history": true,
-      "**/.VSCodeCounter": true
-    },
-    "cSpell.ignorePaths": [
-      "package.json"
-    ]
-  }
-  
+  "files.exclude":{
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/node_modules": true,
+    "**/.erb": true,
+    "**/.husky": true,
+    "**/__tests__": true,
+    "**/.history": true,
+    "**/.VSCodeCounter": true,
+    "**/.vscode": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/.node-version": true,
+    "**/.editorconfig": true,
+    "**/.gitignore": true,
+    "**/yarn.lock": true,
+    "**/API_Bruno": true,
+    "**/.github": true,
+    "**/lib": true
+  },
+  "cSpell.ignorePaths": [
+    "package.json"
+  ]
+}
