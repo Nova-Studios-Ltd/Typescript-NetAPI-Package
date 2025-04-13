@@ -34,7 +34,7 @@ export class NetAPI {
    * @param headers Optional headers along side the request
    * @returns A NetResponse with the data
    */
-  static async GET<T>(endpoint: string, timeout: number | undefined = -1, headers: NetHeaders | undefined | undefined): Promise<NetResponse<T>> {
+  static async GET<T>(endpoint: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
       method: "GET",
       headers: headers?.Finish() || {},
@@ -51,7 +51,7 @@ export class NetAPI {
    * @param headers Optional headers along side the request
    * @returns A NetResponse with the data
    */
-  static async POST<T>(endpoint: string, payload: string | BufferPayload[], timeout: number | undefined = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async POST<T>(endpoint: string, payload: string | BufferPayload[], timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
     let finalPayload: string | FormData;
     if (typeof payload === "string") finalPayload = payload;
     else {
@@ -78,7 +78,7 @@ export class NetAPI {
    * @param headers Optional headers along side the request
    * @returns A NetResponse with the data
    */
-  static async PUT<T>(endpoint: string, payload: string, timeout: number | undefined = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async PUT<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
       method: "PUT",
       headers: headers?.Finish() || {},
@@ -96,7 +96,7 @@ export class NetAPI {
    * @param headers Optional headers along side the request
    * @returns A NetResponse with the data
    */
-  static async PATCH<T>(endpoint: string, payload: string, timeout: number | undefined = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async PATCH<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
       method: "PATCH",
       headers: headers?.Finish() || {},
@@ -114,7 +114,7 @@ export class NetAPI {
    * @param headers Optional headers along side the request
    * @returns A NetResponse with the data
    */
-  static async DELETE<T>(endpoint: string, payload: string, timeout: number | undefined = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async DELETE<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
       method: "DELETE",
       headers: headers?.Finish() || {},
