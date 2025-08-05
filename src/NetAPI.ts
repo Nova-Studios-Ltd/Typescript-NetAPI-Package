@@ -2,11 +2,18 @@ import { BufferPayload } from "./BufferPayload";
 import { NetHeaders } from "./NetHeaders";
 import { NetResponse } from "./NetResponse";
 
-export class NetAPI {
-  private static API_DOMAIN = "";
+type KeyValue = {[key: string]: any};
 
-  static async Init(domain: string) {
-    this.API_DOMAIN = domain;
+export class NetAPI {
+  private static DEFAULT_DOMAIN = "";
+  private static DEFAULT_HEADERS = {} as KeyValue;
+
+  static SetDefaultDomain(domain: string) {
+    this.DEFAULT_DOMAIN = domain;
+  }
+
+  static SetDefaultHeaders(headers: KeyValue) {
+    this.DEFAULT_HEADERS = headers;
   }
 
 
@@ -35,7 +42,7 @@ export class NetAPI {
    * @returns A NetResponse with the data
    */
   static async GET<T>(endpoint: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
-    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
+    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "GET",
       headers: headers?.Finish() || {},
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
@@ -60,7 +67,7 @@ export class NetAPI {
       finalPayload = formData;
     }
 
-    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
+    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "POST",
       headers: headers?.Finish() || {},
       body: finalPayload,
@@ -79,7 +86,7 @@ export class NetAPI {
    * @returns A NetResponse with the data
    */
   static async PUT<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
-    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
+    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "PUT",
       headers: headers?.Finish() || {},
       body: payload,
@@ -97,7 +104,7 @@ export class NetAPI {
    * @returns A NetResponse with the data
    */
   static async PATCH<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
-    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
+    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "PATCH",
       headers: headers?.Finish() || {},
       body: payload,
@@ -115,7 +122,7 @@ export class NetAPI {
    * @returns A NetResponse with the data
    */
   static async DELETE<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
-    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.API_DOMAIN}/${endpoint}`, {
+    const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "DELETE",
       headers: headers?.Finish() || {},
       body: payload,
@@ -137,8 +144,8 @@ export class NetAPI {
    * @returns A NetResponse with the data
    */
   static async GETBuffer(endpoint: string, headers?: NetHeaders | undefined, ignoreCache = false): Promise<NetResponse<Uint8Array>> {
-    endpoint = endpoint.replace(NetAPI.API_DOMAIN, "");
-    const url = (endpoint.startsWith("http")) ? `${this.API_DOMAIN}/Proxy?url=${endpoint}` : `${this.API_DOMAIN}/${endpoint}`;
+    endpoint = endpoint.replace(NetAPI.DEFAULT_DOMAIN, "");
+    const url = (endpoint.startsWith("http")) ? `${this.DEFAULT_DOMAIN}/Proxy?url=${endpoint}` : `${this.DEFAULT_DOMAIN}/${endpoint}`;
 
     const cache = await caches.open("MediaCache");
 
