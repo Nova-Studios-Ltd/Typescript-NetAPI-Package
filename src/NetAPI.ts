@@ -1,167 +1,194 @@
-import { BufferPayload } from "./BufferPayload";
-import { NetHeaders } from "./NetHeaders";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { KeyValue, Payload } from "Types";
 import { NetResponse } from "./NetResponse";
 
-type KeyValue = {[key: string]: any};
-
+/**
+ * NetAPI provides basic REST methods for making HTTP calls to an API endpoint.
+ *
+ * Each static method returns a wrapped NetResponse containing the result, status and message.
+ */
 export class NetAPI {
   private static DEFAULT_DOMAIN = "";
   private static DEFAULT_HEADERS = {} as KeyValue;
 
+  /**
+   * Sets the default domain (base URL) for API calls.
+   * @param {string} domain - The default domain to use for endpoints that do not start with 'http'.
+   */
   static SetDefaultDomain(domain: string) {
     this.DEFAULT_DOMAIN = domain;
   }
 
+  /**
+   * Sets the default HTTP headers for every API call.
+   * @param {KeyValue} headers - The headers as a key-value object.
+   */
   static SetDefaultHeaders(headers: KeyValue) {
     this.DEFAULT_HEADERS = headers;
   }
 
-
+  /**
+   * Parses a JSON string payload into an object of type T.
+   * If parsing fails, returns the original string as T type.
+   *
+   * @template T
+   * @param {string} json - The payload string to parse.
+   * @returns {T} The parsed payload as object or the raw payload as T.
+   * @private
+   */
   private static ParsePayload<T>(json: string): T {
     if (json === "") return "" as T;
     let data = undefined;
     try {
       data = JSON.parse(json);
-    } catch (e) {
+    } catch {
       return json as T;
     }
 
     if (typeof data === "object" && data !== null) {
       return data as T;
     }
-
     return "" as T;
   }
 
-
   /**
-   * Use to GET data from the API
-   * @param endpoint Url of the endpoint
-   * @param timeout Maximum request time in milliseconds
-   * @param headers Optional headers along side the request
-   * @returns A NetResponse with the data
+   * Performs a GET request.
+   *
+   * @template T
+   * @param {string} endpoint - API endpoint or URL.
+   * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
+   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async GET<T>(endpoint: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async GET<T>(endpoint: string, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "GET",
-      headers: headers?.Finish() || {},
+      headers: { ...this.DEFAULT_HEADERS, ...headers },
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+
+    if (resp.headers.get("Content-Type") === "application/octet-stream")
+      return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
     return new NetResponse<T>(resp.status, resp.statusText, NetAPI.ParsePayload<T>(await resp.text()));
   }
 
   /**
-   * Use to POST data to the API
-   * @param endpoint Url of the endpoint
-   * @param payload The data to be sent with the request
-   * @param headers Optional headers along side the request
-   * @returns A NetResponse with the data
+   * Prepares the request body payload based on type (string, FormData, or undefined).
+   *
+   * @param {Payload} payload - The payload to send (string or array of file buffers).
+   * @returns {string | FormData | undefined} The value to use for request body.
+   * @private
    */
-  static async POST<T>(endpoint: string, payload: string | BufferPayload[], timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
-    let finalPayload: string | FormData;
+  private static PreparePayload(payload: Payload): string | FormData | undefined {
+    let finalPayload: string | FormData | undefined = undefined;
     if (typeof payload === "string") finalPayload = payload;
-    else {
+    else if (payload !== undefined) {
       const formData = new FormData();
       payload.forEach((buf) => formData.append("file", buf.payload, buf.name));
       finalPayload = formData;
     }
+    return finalPayload;
+  }
 
+  /**
+   * Performs a POST request.
+   *
+   * @template T
+   * @param {string} endpoint - API endpoint or URL.
+   * @param {Payload} [payload] - Payload/body to send (string or file array).
+   * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
+   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
+   */
+  static async POST<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "POST",
-      headers: headers?.Finish() || {},
-      body: finalPayload,
+      headers: { ...this.DEFAULT_HEADERS, ...headers },
+      body: this.PreparePayload(payload),
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+
+    if (resp.headers.get("Content-Type") === "application/octet-stream")
+      return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
     return new NetResponse<T>(resp.status, resp.statusText, NetAPI.ParsePayload<T>(await resp.text()));
   }
 
-
   /**
-   * Use to PUT data to the API
-   * @param endpoint Url of the endpoint
-   * @param payload The data to be sent with the request
-   * @param headers Optional headers along side the request
-   * @returns A NetResponse with the data
+   * Performs a PUT request.
+   *
+   * @template T
+   * @param {string} endpoint - API endpoint or URL.
+   * @param {Payload} [payload] - Payload/body to send (string or file array).
+   * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
+   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async PUT<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async PUT<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "PUT",
-      headers: headers?.Finish() || {},
-      body: payload,
+      headers: { ...this.DEFAULT_HEADERS, ...headers },
+      body: this.PreparePayload(payload),
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+
+    if (resp.headers.get("Content-Type") === "application/octet-stream")
+      return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
     return new NetResponse<T>(resp.status, resp.statusText, NetAPI.ParsePayload<T>(await resp.text()));
   }
 
   /**
-   * Use to PATCH data to the API
-   * @param endpoint Url of the endpoint
-   * @param payload The data to be sent with the request
-   * @param headers Optional headers along side the request
-   * @returns A NetResponse with the data
+   * Performs a PATCH request.
+   *
+   * @template T
+   * @param {string} endpoint - API endpoint or URL.
+   * @param {Payload} [payload] - Payload/body to send (string or file array).
+   * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
+   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async PATCH<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async PATCH<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "PATCH",
-      headers: headers?.Finish() || {},
-      body: payload,
+      headers: { ...this.DEFAULT_HEADERS, ...headers },
+      body: this.PreparePayload(payload),
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+
+    if (resp.headers.get("Content-Type") === "application/octet-stream")
+      return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
     return new NetResponse<T>(resp.status, resp.statusText, NetAPI.ParsePayload<T>(await resp.text()));
   }
 
   /**
-   * Use to DELETE data from the API
-   * @param endpoint Url of the endpoint
-   * @param payload The data to be sent with the request
-   * @param headers Optional headers along side the request
-   * @returns A NetResponse with the data
+   * Performs a DELETE request (NOTE: appears to use PATCH as the HTTP method).
+   *
+   * @template T
+   * @param {string} endpoint - API endpoint or URL.
+   * @param {Payload} [payload] - Payload/body to send (string or file array).
+   * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
+   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async DELETE<T>(endpoint: string, payload: string, timeout: number = -1, headers?: NetHeaders | undefined): Promise<NetResponse<T>> {
+  static async DELETE<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
-      method: "DELETE",
-      headers: headers?.Finish() || {},
-      body: payload,
+      method: "PATCH",
+      headers: { ...this.DEFAULT_HEADERS, ...headers },
+      body: this.PreparePayload(payload),
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+
+    if (resp.headers.get("Content-Type") === "application/octet-stream")
+      return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
     return new NetResponse<T>(resp.status, resp.statusText, NetAPI.ParsePayload<T>(await resp.text()));
-  }
-
-  /* Special functions for handling direct buffer data */
-  /* Automatically proxies data through API */
-
-  /**
-   * @deprecated SPECIAL FUNCTION, WILL BE REWRITTEN LATER
-   * Use to GET a buffer of data from the API (Such as a file or other non-text data)
-   * @param endpoint Url of the endpoint
-   * @param headers Optional headers along side the request
-   * @param ignoreCache Ignores cache
-   * @returns A NetResponse with the data
-   */
-  static async GETBuffer(endpoint: string, headers?: NetHeaders | undefined, ignoreCache = false): Promise<NetResponse<Uint8Array>> {
-    endpoint = endpoint.replace(NetAPI.DEFAULT_DOMAIN, "");
-    const url = (endpoint.startsWith("http")) ? `${this.DEFAULT_DOMAIN}/Proxy?url=${endpoint}` : `${this.DEFAULT_DOMAIN}/${endpoint}`;
-
-    const cache = await caches.open("MediaCache");
-
-    if (!ignoreCache && cache !== undefined) {
-      const entry = await cache.match(url);
-      if (entry !== undefined) return new NetResponse<Uint8Array>(entry.status, entry.statusText, new Uint8Array(await entry.arrayBuffer()));
-    }
-
-    const resp = await fetch(url, {
-      method: "GET",
-      headers: headers?.Finish() || {}
-    });
-
-    if (!ignoreCache && cache !== undefined) {
-      cache.put(url, resp.clone());
-    }
-    return new NetResponse<Uint8Array>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()));
   }
 }

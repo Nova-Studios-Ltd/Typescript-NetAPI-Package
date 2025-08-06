@@ -1,8 +1,7 @@
-import { NetHeaders } from "./NetHeaders";
 import { NetAPI } from "./NetAPI";
 import { NetResponse } from "./NetResponse";
 import { BufferPayload } from "./BufferPayload";
-import { ContentType } from "./ContentType";
 import { HTTPStatus } from "./HTTPStatus";
+import { KeyValue, Payload } from "Types";
 
-export { NetHeaders, NetAPI, NetResponse, BufferPayload, ContentType, HTTPStatus };
+export { NetAPI, NetResponse, BufferPayload, HTTPStatus, KeyValue, Payload };

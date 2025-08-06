@@ -21,13 +21,19 @@ npm install @nova-studios-ltd/typescript-netapi
 ```typescript
 import { NetAPI } from "@nova-studios-ltd/typescript-netapi";
 
-NetAPI.Init("https://api.novastudios.uk");
+//Optional: Set a global domain
+NetAPI.SetDefaultDomain("https://api.novastudios.uk");
+
+// Optional
+NetAPI.SetDefaultHeaders({
+  "Authorization": "Pineapples"
+});
 
 // GET (Applies to all methods) Without headers
 await NetAPI.GET<string>("/Channel/my-new-channel");
 
 // GET (Applies to all methods) With headers
-await NetAPI.GET<string>("/Channel/my-new-channel-2", new NetHeaders().WithAuthorization("MyPassword"));
+await NetAPI.GET<string>("/Channel/my-new-channel-2", {"Authorization": "Bearer Pineapples"});
 
 ```
 

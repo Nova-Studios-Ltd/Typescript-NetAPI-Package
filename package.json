@@ -1,6 +1,6 @@
 {
   "name": "@nova-studios-ltd/typescript-netapi",
-  "version": "1.5.1",
+  "version": "2",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -17,7 +17,10 @@
   "author": "nova1545",
   "license": "GPL-3.0",
   "devDependencies": {
-    "typescript": "^5.8.2"
+    "@eslint/js": "^9.32.0",
+    "eslint": "^9.32.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0"
   },
   "repository": {
     "type": "git",
