@@ -168,7 +168,7 @@ export class NetAPI {
   }
 
   /**
-   * Performs a DELETE request (NOTE: appears to use PATCH as the HTTP method).
+   * Performs a DELETE request
    *
    * @template T
    * @param {string} endpoint - API endpoint or URL.
@@ -179,7 +179,7 @@ export class NetAPI {
    */
   static async DELETE<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
-      method: "PATCH",
+      method: "DELETE",
       headers: { ...this.DEFAULT_HEADERS, ...headers },
       body: this.PreparePayload(payload),
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
