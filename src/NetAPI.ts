@@ -67,7 +67,7 @@ export class NetAPI {
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
-    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, NetAPI.ParsePayload<any>(await resp.text()));
 
     if (resp.headers.get("Content-Type") === "application/octet-stream")
       return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
@@ -110,7 +110,7 @@ export class NetAPI {
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
-    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, NetAPI.ParsePayload<any>(await resp.text()));
 
     if (resp.headers.get("Content-Type") === "application/octet-stream")
       return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
@@ -135,7 +135,7 @@ export class NetAPI {
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
-    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, NetAPI.ParsePayload<any>(await resp.text()));
 
     if (resp.headers.get("Content-Type") === "application/octet-stream")
       return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
@@ -160,7 +160,7 @@ export class NetAPI {
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
-    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, NetAPI.ParsePayload<any>(await resp.text()));
 
     if (resp.headers.get("Content-Type") === "application/octet-stream")
       return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
@@ -185,7 +185,7 @@ export class NetAPI {
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
-    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, undefined);
+    if (resp.status !== 200) return new NetResponse<undefined>(resp.status, resp.statusText, NetAPI.ParsePayload<any>(await resp.text()));
 
     if (resp.headers.get("Content-Type") === "application/octet-stream")
       return new NetResponse<T>(resp.status, resp.statusText, new Uint8Array(await resp.arrayBuffer()) as any);
