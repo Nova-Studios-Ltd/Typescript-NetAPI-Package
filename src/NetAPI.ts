@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { KeyValue, Payload } from "Types";
 import { NetResponse } from "./NetResponse";
 
 /**
@@ -9,7 +8,7 @@ import { NetResponse } from "./NetResponse";
  */
 export class NetAPI {
   private static DEFAULT_DOMAIN = "";
-  private static DEFAULT_HEADERS = {} as KeyValue;
+  private static DEFAULT_HEADERS = {} as Record<string, string>;
 
   /**
    * Sets the default domain (base URL) for API calls.
@@ -21,9 +20,9 @@ export class NetAPI {
 
   /**
    * Sets the default HTTP headers for every API call.
-   * @param {KeyValue} headers - The headers as a key-value object.
+   * @param {Record<string, string>} headers - The headers as a key-value object.
    */
-  static SetDefaultHeaders(headers: KeyValue) {
+  static SetDefaultHeaders(headers: Record<string, string>) {
     this.DEFAULT_HEADERS = headers;
   }
 
@@ -57,10 +56,10 @@ export class NetAPI {
    * @template T
    * @param {string} endpoint - API endpoint or URL.
    * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
-   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @param {Record<string, string>} [headers] - Optional HTTP headers.
    * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async GET<T>(endpoint: string, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
+  static async GET<T>(endpoint: string, timeout: number = -1, headers?: Record<string, string> | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "GET",
       headers: { ...this.DEFAULT_HEADERS, ...headers },
@@ -75,38 +74,20 @@ export class NetAPI {
   }
 
   /**
-   * Prepares the request body payload based on type (string, FormData, or undefined).
-   *
-   * @param {Payload} payload - The payload to send (string or array of file buffers).
-   * @returns {string | FormData | undefined} The value to use for request body.
-   * @private
-   */
-  private static PreparePayload(payload: Payload): string | FormData | undefined {
-    let finalPayload: string | FormData | undefined = undefined;
-    if (typeof payload === "string") finalPayload = payload;
-    else if (payload !== undefined) {
-      const formData = new FormData();
-      payload.forEach((buf) => formData.append("file", buf.payload, buf.name));
-      finalPayload = formData;
-    }
-    return finalPayload;
-  }
-
-  /**
    * Performs a POST request.
    *
    * @template T
    * @param {string} endpoint - API endpoint or URL.
    * @param {Payload} [payload] - Payload/body to send (string or file array).
    * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
-   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @param {Record<string, string>} [headers] - Optional HTTP headers.
    * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async POST<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
+  static async POST<T>(endpoint: string, payload?: FormData | string | undefined, timeout: number = -1, headers?: Record<string, string> | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "POST",
       headers: { ...this.DEFAULT_HEADERS, ...headers },
-      body: this.PreparePayload(payload),
+      body: payload,
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
@@ -124,14 +105,14 @@ export class NetAPI {
    * @param {string} endpoint - API endpoint or URL.
    * @param {Payload} [payload] - Payload/body to send (string or file array).
    * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
-   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @param {Record<string, string>} [headers] - Optional HTTP headers.
    * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async PUT<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
+  static async PUT<T>(endpoint: string, payload?: FormData | string | undefined, timeout: number = -1, headers?: Record<string, string> | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "PUT",
       headers: { ...this.DEFAULT_HEADERS, ...headers },
-      body: this.PreparePayload(payload),
+      body: payload,
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
@@ -149,14 +130,14 @@ export class NetAPI {
    * @param {string} endpoint - API endpoint or URL.
    * @param {Payload} [payload] - Payload/body to send (string or file array).
    * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
-   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @param {Record<string, string>} [headers] - Optional HTTP headers.
    * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async PATCH<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
+  static async PATCH<T>(endpoint: string, payload?: FormData | string | undefined, timeout: number = -1, headers?: Record<string, string> | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "PATCH",
       headers: { ...this.DEFAULT_HEADERS, ...headers },
-      body: this.PreparePayload(payload),
+      body: payload,
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
@@ -174,14 +155,14 @@ export class NetAPI {
    * @param {string} endpoint - API endpoint or URL.
    * @param {Payload} [payload] - Payload/body to send (string or file array).
    * @param {number} [timeout=-1] - Optional timeout in milliseconds, -1 for no timeout.
-   * @param {KeyValue} [headers] - Optional HTTP headers.
+   * @param {Record<string, string>} [headers] - Optional HTTP headers.
    * @returns {Promise<NetResponse<T | undefined>>} Resolves with the NetResponse.
    */
-  static async DELETE<T>(endpoint: string, payload?: Payload, timeout: number = -1, headers?: KeyValue | undefined): Promise<NetResponse<T | undefined>> {
+  static async DELETE<T>(endpoint: string, payload?: FormData | string | undefined, timeout: number = -1, headers?: Record<string, string> | undefined): Promise<NetResponse<T | undefined>> {
     const resp = await fetch((endpoint.startsWith("http")) ? endpoint : `${this.DEFAULT_DOMAIN}/${endpoint}`, {
       method: "DELETE",
       headers: { ...this.DEFAULT_HEADERS, ...headers },
-      body: this.PreparePayload(payload),
+      body: payload,
       signal: timeout === -1 ? null : AbortSignal.timeout(timeout)
     });
 
